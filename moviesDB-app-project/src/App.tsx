@@ -1,35 +1,49 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// App.tsx
+import React, { useState } from 'react';
+import { ReactQueryDevtools } from 'react-query/devtools';
+import useMoviesQuery from './Hooks/useMoviesQuery';
 
-function App() {
-  const [count, setCount] = useState(0)
+const App: React.FC = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const { data, isLoading, isError } = useMoviesQuery(searchTerm);
+
+  const handleSearch = () => {
+    setSearchTerm(searchTerm);
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div>
+      <h1>MovieDB App</h1>
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        placeholder="Search for movies"
+      />
+      <button onClick={handleSearch}>Search</button>
 
-export default App
+      {isLoading && <p>Loading...</p>}
+      {isError && <p>Error loading data</p>}
+
+      {data && data.Search ? (
+        <ul>
+          {data.Search.map((movie: any) => (
+            <li key={movie.imdbID}>
+              <h2>{movie.Title}</h2>
+              <p>Year: {movie.Year}</p>
+              <p>Type: {movie.Type}</p>
+              <button onClick={() => console.log('View Details', movie)}>View Details</button>
+              {/* Add the image here if available */}
+              {movie.Poster && <img src={movie.Poster} alt={movie.Title} />}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      <ReactQueryDevtools />
+    </div>
+  );
+};
+
+export default App;
